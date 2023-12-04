@@ -16,5 +16,30 @@
 				"data/symbols.txt",
 			],
 		},
+		{
+			"name": "lab_3 LEX",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/lab_3.dart",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"LEX",
+				"data/in.txt",
+				"data/tokens.txt",
+				"data/symbols.txt",
+			],
+		},
+		{
+			"name": "lab_3 SYN",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/lab_3.dart",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"SYN",
+				"data/in.txt",
+				"data/syntax_tree.txt",
+			],
+		},
 	],
 }

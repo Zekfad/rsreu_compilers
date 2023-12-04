@@ -1,12 +1,13 @@
 name: rsreu_compilers
 description: Compilers course.
-version: 2.0.0
+version: 3.0.0
 repository: https://github.com/zekfad/rsreu_compilers
 
 environment:
   sdk: ^3.2.0-0
 
-dependencies: {}
+dependencies:
+  args: ^2.4.2
 
 dev_dependencies:
   zekfad_lints: ^1.0.0

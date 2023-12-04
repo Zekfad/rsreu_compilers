@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:rsreu_compilers/scanner/lexical_exception.dart';
-import 'package:rsreu_compilers/scanner/scanner.dart';
-import 'package:rsreu_compilers/scanner/tokens/token_type.dart';
+
+import 'package:rsreu_compilers/scanner.dart';
+
 
 Future<void> main(List<String> arguments) async {
   if (arguments.length < 3)
@@ -48,6 +48,7 @@ Future<void> main(List<String> arguments) async {
       TokenType.identifier => 'идентификатор с именем ${token.lexeme}',
       TokenType.integer => 'константа целого типа',
       TokenType.floatingPoint => 'константа вещественного типа',
+      TokenType.equals => 'операция присвоения',
 
       TokenType.expressionTerminator || TokenType.eof => throw StateError('Impossible state'),
     };

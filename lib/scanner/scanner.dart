@@ -3,6 +3,7 @@ import 'dart:async';
 import 'lexical_exception.dart';
 import 'tokens.dart';
 
+
 class Scanner {
   Scanner(this.source);
 
@@ -32,6 +33,16 @@ class Scanner {
         lexeme : source.substring(_start, _current),
         offset : _start,
         literal: literal,
+      ),
+    );
+
+  void _addSymbol(TokenType type, String name) =>
+    _controller.add(
+      SymbolToken(
+        type  : type,
+        lexeme: source.substring(_start, _current),
+        offset: _start,
+        name  : name,
       ),
     );
 
@@ -124,7 +135,10 @@ class Scanner {
   void _scanIdentifier() {
     while (_isAlphaNumeric(_peek()))
       _advance();
-    _addToken(TokenType.identifier);
+    _addSymbol(
+      TokenType.identifier,
+      source.substring(_start, _current),
+    );
   }
 
   /// Scans one of the following:
@@ -170,7 +184,10 @@ class Scanner {
 
     if (identifier) {
       _addError('Identifier starts with number', _start);
-      return _addToken(TokenType.identifier);
+      return _addSymbol(
+        TokenType.identifier,
+        source.substring(_start, _current),
+      );
     }
 
     return _addLiteral(
@@ -191,6 +208,7 @@ class Scanner {
       case '-': _addToken(TokenType.minus);
       case '*': _addToken(TokenType.asterisk);
       case '/': _addToken(TokenType.slash);
+      case '=': _addToken(TokenType.equals);
 
       default: {
         if (_isAlpha(c)) {

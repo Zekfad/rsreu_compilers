@@ -6,6 +6,7 @@ enum TokenType {
   slash,
   leftBrace,
   rightBrace,
+  equals,
 
   // One or two character tokens.
 
