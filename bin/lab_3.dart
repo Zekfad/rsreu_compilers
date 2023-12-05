@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:rsreu_compilers/ast_utlils/ast_printer.dart';
-import 'package:rsreu_compilers/ast_utlils/ast_symbol_generator.dart';
+import 'package:rsreu_compilers/ast_utils/ast_printer.dart';
+import 'package:rsreu_compilers/ast_utils/ast_symbol_generator.dart';
 import 'package:rsreu_compilers/file_io.dart';
 import 'package:rsreu_compilers/parser.dart';
 import 'package:rsreu_compilers/scanner.dart';
