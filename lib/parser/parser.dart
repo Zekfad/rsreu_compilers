@@ -74,7 +74,7 @@ class Parser {
     const [ TokenType.slash, TokenType.asterisk, ],
   );
 
-  Expression _unary() {
+   Expression _unary() {
     if (_match(const [ TokenType.minus, ])) {
       final operator = _previous();
       final right = _unary();
@@ -82,6 +82,16 @@ class Parser {
     }
 
     return _primary();
+  }
+
+  Type _type() {
+    final token = _previous();
+    final type = switch(token) {
+      SymbolToken(name: 'F' || 'f') => DataType.float,
+      SymbolToken(name: 'I' || 'i') => DataType.integer,
+      _ => throw ParserException('Invalid type', source, token),
+    };
+    return Type(token, type);
   }
 
   Expression _primary() {
@@ -95,8 +105,11 @@ class Parser {
     }
 
     if (_match(const [ TokenType.identifier, ])) {
-      final token = _previous();
-      return Identifier(token, token.lexeme);
+      final identifierToken = _previous();
+      final type = _match(const [ TokenType.type, ])
+        ? _type()
+        : Type.unknown;
+      return Identifier(identifierToken, identifierToken.lexeme, type);
     }
 
     if (_match(const [ TokenType.leftBrace, ])) {

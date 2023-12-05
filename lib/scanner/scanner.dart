@@ -132,6 +132,30 @@ class Scanner {
   //   );
   // }
 
+
+  void _scanType() {
+    while (_peek() != ']' && !_isAtEnd) {
+      if (!_isAlpha(_peek())) {
+        _addError('Unexpected character in type');
+        return;
+      }
+      _advance();
+    }
+
+    if (_isAtEnd) {
+      _addError('Unterminated type, expected right square bracket');
+      return;
+    }
+
+    // Consume the closing "]".
+    _advance();
+    
+    _addSymbol(
+      TokenType.type,
+      source.substring(_start + 1, _current - 1),
+    );
+  }
+
   void _scanIdentifier() {
     while (_isAlphaNumeric(_peek()))
       _advance();
@@ -204,6 +228,11 @@ class Scanner {
 
       case '(': _addToken(TokenType.leftBrace);
       case ')': _addToken(TokenType.rightBrace);
+      case '[': _scanType();
+      case ']': {
+        _addError('Unexpected right square bracket');
+        break;
+      }
       case '+': _addToken(TokenType.plus);
       case '-': _addToken(TokenType.minus);
       case '*': _addToken(TokenType.asterisk);

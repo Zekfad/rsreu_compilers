@@ -51,21 +51,21 @@ Future<void> main(List<String> arguments) async {
             final inputFile = FileIo(File(_input));
             final tokensFile = FileIo(File(_token));
             final symbolsFile = FileIo(File(_symbols));
-            final input = inputFile.readAsString();
+            final source = inputFile.readAsString();
             if (!tokensFile.tryOpen(FileMode.write))
               throw const FileSystemException('Cannot open tokens file for write');
             if (!symbolsFile.tryOpen(FileMode.write))
               throw const FileSystemException('Cannot open tokens file for write');
 
             try {
-              final scanner = Scanner(input);
+              final scanner = Scanner(source);
               final tokens = await getMainTokens(scanner);
-              final parser = Parser(input, tokens);
+              final parser = Parser(source, tokens);
               final ast = parser.parse();
               if (ast == null)
                 throw Exception('Invalid input');
 
-              final symbols = ast.accept(AstSymbolGenerator())!;
+              final symbols = ast.accept(AstSymbolGenerator(), source)!;
 
               for (final (id, (_, symbol)) in symbols.indexed) {
                 symbolsFile.writeln('<id,$id>\t- ${symbol.name}');
@@ -84,13 +84,11 @@ Future<void> main(List<String> arguments) async {
                   TokenType.slash => 'операция деления',
                   TokenType.leftBrace => 'открывающая скобка',
                   TokenType.rightBrace => 'закрывающая скобка',
-                  TokenType.leftSquareBracket => 'открывающая квадратная скобка',
-                  TokenType.rightSquareBracket => 'закрывающая квадратная скобка',
 
-                  TokenType.identifier => 'идентификатор с именем ${token.lexeme}',
+                  TokenType.identifier => 'идентификатор с именем ${(token as SymbolToken).name}',
                   TokenType.integer => 'константа целого типа',
                   TokenType.floatingPoint => 'константа вещественного типа',
-                  TokenType.type => 'тип с именем ${token.lexeme}',
+                  TokenType.type => 'тип с именем ${(token as SymbolToken).name}',
 
                   TokenType.equals => 'операция присвоения',
 
@@ -115,19 +113,20 @@ Future<void> main(List<String> arguments) async {
           ]) {
             final inputFile = FileIo(File(_input));
             final outputFile = FileIo(File(_output));
-            final input = inputFile.readAsString();
+            final source = inputFile.readAsString();
 
             if (!outputFile.tryOpen(FileMode.write))
               throw const FileSystemException('Cannot open output file for write');
 
             try {
-              final scanner = Scanner(input);
+              final scanner = Scanner(source);
               final tokens = await getMainTokens(scanner);
-              final parser = Parser(input, tokens);
+              final parser = Parser(source, tokens);
               final ast = parser.parse();
               if (ast == null)
                 throw Exception('Invalid input');
 
+              ast.accept(AstSymbolGenerator(), source)!;
               final printer = AstPrinter();
 
               outputFile.write(ast.accept(printer)!);
@@ -143,7 +142,7 @@ Future<void> main(List<String> arguments) async {
     else
       throw const FormatException('No arguments.');
   } on FormatException catch (e) {
-    print(e.message);
+    print(e);
     print('');
     printUsage(argParser);
     exit(1);

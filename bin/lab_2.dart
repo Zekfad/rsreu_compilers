@@ -44,13 +44,11 @@ Future<void> main(List<String> arguments) async {
       TokenType.slash => 'операция деления',
       TokenType.leftBrace => 'открывающая скобка',
       TokenType.rightBrace => 'закрывающая скобка',
-      TokenType.leftSquareBracket => 'открывающая квадратная скобка',
-      TokenType.rightSquareBracket => 'закрывающая квадратная скобка',
 
-      TokenType.identifier => 'идентификатор с именем ${token.lexeme}',
+      TokenType.identifier => 'идентификатор с именем ${(token as SymbolToken).name}',
       TokenType.integer => 'константа целого типа',
       TokenType.floatingPoint => 'константа вещественного типа',
-      TokenType.type => 'тип с именем ${token.lexeme}',
+      TokenType.type => 'тип с именем ${(token as SymbolToken).name}',
 
       TokenType.equals => 'операция присвоения',
 

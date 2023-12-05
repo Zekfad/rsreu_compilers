@@ -13,7 +13,9 @@ primary ::= literal | ("(", expression, ")");
 
 literal ::= number | identifier;
 
-identifier ::= alpha, { alpha | digit };
+identifier ::= alpha, { alpha | digit }, [ type, ];
+
+type ::= "[", { alpha, }, "]";
 
 number ::= integer | floating_point;
 
