@@ -58,7 +58,7 @@ class Parser {
     while (_match(operatorTypes)) {
       final operator = _previous();
       final right = expressionParser();
-      expression = Binary(expression, operator, right);
+      expression = Binary(expression.token, expression, operator, right);
     }
 
     return expression;
@@ -78,7 +78,7 @@ class Parser {
     if (_match(const [ TokenType.minus, ])) {
       final operator = _previous();
       final right = _unary();
-      return Unary(operator, right);
+      return Unary(operator, operator, right);
     }
 
     return _primary();
@@ -87,20 +87,22 @@ class Parser {
   Expression _primary() {
     if (_match(const [ TokenType.integer, TokenType.floatingPoint, ])) {
       return switch (_previous()) {
-        LiteralToken<int>(:final literal?) => Literal(literal),
-        LiteralToken<double>(:final literal?) => Literal(literal),
+        LiteralToken<int>(:final literal?) && final token => Literal(token, literal),
+        LiteralToken<double>(:final literal?) && final token => Literal(token, literal),
         final actual =>
           throw StateError('Invalid state, expected literal, got: $actual'),
       };
     }
 
-    if (_match(const [ TokenType.identifier, ]))
-      return Identifier(_previous().lexeme);
+    if (_match(const [ TokenType.identifier, ])) {
+      final token = _previous();
+      return Identifier(token, token.lexeme);
+    }
 
     if (_match(const [ TokenType.leftBrace, ])) {
       final expression = _expression();
       _consume(TokenType.rightBrace, 'Expect ")" after expression.');
-      return Grouping(expression);
+      return Grouping(expression.token, expression);
     }
 
     throw _error('Expect expression.', _peek());

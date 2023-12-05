@@ -35,9 +35,42 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   StringBuffer? _visitToken(Token token, [ AstPrinterContext? context, ]) =>
     _buffer..writeln('Token: ${token.type.name} ${token.lexeme}');
 
+  StringBuffer? _visitNull(String text, [ AstPrinterContext? context, ]) =>
+    _buffer..writeln(text);
+
+  StringBuffer? _tryAccept(Expression? expression, {
+    AstPrinterContext? context,
+    String? fallbackText,
+  }) => expression != null
+    ? expression.accept(this, context)
+    : (fallbackText != null
+      ? _visitNull(fallbackText, context)
+      : _buffer
+    );
+
   @override
-  StringBuffer? visitIdentifier(Identifier node, [ AstPrinterContext? context, ]) =>
-    _buffer..writeln('Identifier: ${node.name}');
+  StringBuffer? visitIdentifier(Identifier node, [ AstPrinterContext? context, ]) {
+    context ??= _defaultContext;
+    _buffer.writeln('Identifier: ${node.name}');
+    _tryAccept(
+      fallbackText: 'Type: Untyped',
+      context: context.addIndent(_buffer, true),
+      node.type,
+    );
+    return _buffer;
+  }
+
+  @override
+  StringBuffer? visitType(Type node, [ AstPrinterContext? context, ]) =>
+    _buffer..writeln('Type: ${node.dataType}');
+
+  @override
+  StringBuffer? visitTypeCast(TypeCast node, [ AstPrinterContext? context, ]) {
+    context ??= _defaultContext;
+    _buffer.writeln('TypeCast');
+    node.type.accept(this, context.addIndent(_buffer, true));
+    return _buffer;
+  }
 
   @override
   StringBuffer? visitLiteral(Literal node, [ AstPrinterContext? context, ]) =>

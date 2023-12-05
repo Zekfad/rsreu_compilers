@@ -6,6 +6,8 @@ enum TokenType {
   slash,
   leftBrace,
   rightBrace,
+  leftSquareBracket,
+  rightSquareBracket,
   equals,
 
   // One or two character tokens.
@@ -14,11 +16,13 @@ enum TokenType {
   identifier,
   integer,
   floatingPoint,
+  type,
 
   // Keywords
 
   // Special
   /// Invisible characters (spaces) or semicolon.
+  synthetic,
   expressionTerminator,
   eof,
 }

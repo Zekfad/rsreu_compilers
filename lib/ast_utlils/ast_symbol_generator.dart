@@ -1,13 +1,16 @@
 import '../ast.dart';
+import '../semantics/semantic_exception.dart';
 import '../symbol_table.dart';
 
 
-class AstSymbolGenerator extends AstVisitorSingleResult<SymbolTable, void> {
+class AstSymbolGenerator extends AstVisitorSingleResult<SymbolTable, String> {
   AstSymbolGenerator() : super(SymbolTable());
 
   @override
-  SymbolTable visitIdentifier(Identifier node, [ void context, ]) {
-    result.addIfAbsent(node.name, () => node);
+  SymbolTable visitIdentifier(Identifier node, [ String? context, ]) {
+    final symbol = result.addIfAbsent(node.name, () => node);
+    if (symbol.type != node.type)
+      throw SemanticException('Identifier type redefinition', context ?? '<NO SOURCE>', node);
     return super.visitIdentifier(node, context);
   }
 }

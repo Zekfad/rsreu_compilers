@@ -8,6 +8,11 @@ class Token {
     required this.offset,
   });
 
+  const Token.synthetic({
+    this.lexeme = '<synthetic>',
+    this.offset = 0,
+  }) : type = TokenType.synthetic;
+
   final TokenType type;
   final String lexeme;
   final int offset;

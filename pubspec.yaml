@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   args: ^2.4.2
+  meta: ^1.11.0
 
 dev_dependencies:
   zekfad_lints: ^1.0.0
