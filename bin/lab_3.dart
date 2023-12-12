@@ -27,15 +27,15 @@ Future<List<Token>> getMainTokens(Scanner scanner) async =>
     .toList();
 
 Future<void> main(List<String> arguments) async {  
-  final syntaxParser = ArgParser(allowTrailingOptions: false)
-    ..addSeparator('  syntax tree dumper: [input] [output]');
   final lexerParser = ArgParser(allowTrailingOptions: false)
     ..addSeparator('  lexer: [input] [tokens] [symbols]');
+  final syntaxParser = ArgParser(allowTrailingOptions: false)
+    ..addSeparator('  syntax tree dumper: [input] [syntax_tree]');
   final argParser = ArgParser(allowTrailingOptions: false)
-    ..addCommand('syn', syntaxParser)
-    ..addCommand('SYN', syntaxParser)
     ..addCommand('lex', lexerParser)
-    ..addCommand('LEX', lexerParser);
+    ..addCommand('LEX', lexerParser)
+    ..addCommand('syn', syntaxParser)
+    ..addCommand('SYN', syntaxParser);
 
   try {
     final result = argParser.parse(arguments);
@@ -48,92 +48,15 @@ Future<void> main(List<String> arguments) async {
             final _token,
             final _symbols,
           ]) {
-            final inputFile = FileIo(File(_input));
-            final tokensFile = FileIo(File(_token));
-            final symbolsFile = FileIo(File(_symbols));
-            final source = inputFile.readAsString();
-            if (!tokensFile.tryOpen(FileMode.write))
-              throw const FileSystemException('Cannot open tokens file for write');
-            if (!symbolsFile.tryOpen(FileMode.write))
-              throw const FileSystemException('Cannot open tokens file for write');
-
-            try {
-              final scanner = Scanner(source);
-              final tokens = await getMainTokens(scanner);
-              final parser = Parser(source, tokens);
-              final ast = parser.parse();
-              if (ast == null)
-                throw Exception('Invalid input');
-
-              final symbols = ast.accept(AstSymbolGenerator(), source)!;
-
-              for (final (id, (_, symbol)) in symbols.indexed) {
-                symbolsFile.writeln('<id,$id>\t- ${symbol.name}');
-              }
-
-              for (final token in tokens) {
-                if (token.type == TokenType.expressionTerminator)
-                  continue;
-                if (token.type == TokenType.eof)
-                  break;
-
-                final text = switch (token.type) {
-                  TokenType.plus => 'операция сложения',
-                  TokenType.minus => 'операция вычитания',
-                  TokenType.asterisk => 'операция умножения',
-                  TokenType.slash => 'операция деления',
-                  TokenType.leftBrace => 'открывающая скобка',
-                  TokenType.rightBrace => 'закрывающая скобка',
-
-                  TokenType.identifier => 'идентификатор с именем ${(token as SymbolToken).name}',
-                  TokenType.integer => 'константа целого типа',
-                  TokenType.floatingPoint => 'константа вещественного типа',
-                  TokenType.type => 'тип с именем ${(token as SymbolToken).name}',
-
-                  TokenType.equals => 'операция присвоения',
-
-                  TokenType.expressionTerminator
-                    ||TokenType.synthetic
-                    || TokenType.eof => throw StateError('Impossible state'),
-                };
-
-                tokensFile.writeln('<${token.lexeme}>\t- $text');
-              }
-              return;
-            } finally {
-              tokensFile.close();
-              symbolsFile.close();
-            }
+            return await lexMode(_input, _token, _symbols);
           } else
             throw const FormatException('Invalid arguments count.');
         case 'syn' || 'SYN':
           if (command.arguments case [
             final _input,
-            final _output,
+            final _syntaxTree,
           ]) {
-            final inputFile = FileIo(File(_input));
-            final outputFile = FileIo(File(_output));
-            final source = inputFile.readAsString();
-
-            if (!outputFile.tryOpen(FileMode.write))
-              throw const FileSystemException('Cannot open output file for write');
-
-            try {
-              final scanner = Scanner(source);
-              final tokens = await getMainTokens(scanner);
-              final parser = Parser(source, tokens);
-              final ast = parser.parse();
-              if (ast == null)
-                throw Exception('Invalid input');
-
-              ast.accept(AstSymbolGenerator(), source)!;
-              final printer = AstPrinter();
-
-              outputFile.write(ast.accept(printer)!);
-            } finally {
-              outputFile.close();
-            }
-            return;
+            return await synMode(_input, _syntaxTree);
           } else
             throw const FormatException('Invalid arguments count.');
         default:
@@ -151,5 +74,89 @@ Future<void> main(List<String> arguments) async {
     print('');
     printUsage(argParser);
     exit(2);
+  }
+}
+
+Future<void> synMode(String _input, String _syntaxTree) async {
+  final inputFile = FileIo(File(_input));
+  final syntaxTreeFile = FileIo(File(_syntaxTree));
+  final source = inputFile.readAsString();
+  
+  if (!syntaxTreeFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open output file for write');
+  
+  try {
+    final scanner = Scanner(source);
+    final tokens = await getMainTokens(scanner);
+    final parser = Parser(source, tokens);
+    final ast = parser.parse();
+    if (ast == null)
+      throw Exception('Invalid input');
+  
+    ast.accept(AstSymbolGenerator(), source)!;
+    final printer = AstPrinter();
+  
+    syntaxTreeFile.write(ast.accept(printer)!);
+  } finally {
+    syntaxTreeFile.close();
+  }
+}
+
+Future<void> lexMode(String _input, String _token, String _symbols) async {
+  final inputFile = FileIo(File(_input));
+  final tokensFile = FileIo(File(_token));
+  final symbolsFile = FileIo(File(_symbols));
+  final source = inputFile.readAsString();
+
+  if (!tokensFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open tokens file for write');
+  if (!symbolsFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open tokens file for write');
+  
+  try {
+    final scanner = Scanner(source);
+    final tokens = await getMainTokens(scanner);
+    final parser = Parser(source, tokens);
+    final ast = parser.parse();
+    if (ast == null)
+      throw Exception('Invalid input');
+  
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+  
+    for (final (id, (_, symbol)) in symbols.indexed) {
+      symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.type.dataType}]');
+    }
+  
+    for (final token in tokens) {
+      if (token.type == TokenType.expressionTerminator)
+        continue;
+      if (token.type == TokenType.eof)
+        break;
+  
+      final text = switch (token.type) {
+        TokenType.plus => 'операция сложения',
+        TokenType.minus => 'операция вычитания',
+        TokenType.asterisk => 'операция умножения',
+        TokenType.slash => 'операция деления',
+        TokenType.leftBrace => 'открывающая скобка',
+        TokenType.rightBrace => 'закрывающая скобка',
+  
+        TokenType.identifier => 'идентификатор с именем ${(token as SymbolToken).name}',
+        TokenType.integer => 'константа целого типа',
+        TokenType.floatingPoint => 'константа вещественного типа',
+        TokenType.type => 'тип с именем ${(token as SymbolToken).name}',
+  
+        TokenType.equals => 'операция присвоения',
+  
+        TokenType.expressionTerminator
+          ||TokenType.synthetic
+          || TokenType.eof => throw StateError('Impossible state'),
+      };
+  
+      tokensFile.writeln('<${token.lexeme}>\t- $text');
+    }
+  } finally {
+    tokensFile.close();
+    symbolsFile.close();
   }
 }
