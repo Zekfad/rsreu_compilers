@@ -1,15 +1,22 @@
 part of '../ast.dart';
 
 
-class TypeCast extends Expression {
-  const TypeCast(super.token, this.type);
- 
-  final Type type;
+class TypeCast extends Expression implements TypedNode {
+  const TypeCast(super.token, this.expression, this.dataType) : assert(
+    dataType != DataType.unknown,
+    'Invalid TypeCast AST node: data type must be known',
+  );
+
+  final Expression expression;
+  final DataType dataType;
+
+  @override
+  DataType get resolvedDataType => dataType;
 
   @override
   R? accept<R, C>(AstVisitor<R, C> visitor, [ C? context, ]) =>
     visitor.visitTypeCast(this, context);
 
   @override
-  String toString() => 'TypeCast($type)';
+  String toString() => 'TypeCast($dataType, $expression)';
 }

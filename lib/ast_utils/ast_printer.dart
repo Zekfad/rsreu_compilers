@@ -35,28 +35,26 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   StringBuffer? _visitToken(Token token, [ AstPrinterContext? context, ]) =>
     _buffer..writeln('Token: ${token.type.name} ${token.lexeme}');
 
-  StringBuffer? _visitNull(String text, [ AstPrinterContext? context, ]) =>
+  StringBuffer? _visitText(String text, [ AstPrinterContext? context, ]) =>
     _buffer..writeln(text);
 
+  // ignore: unused_element
   StringBuffer? _tryAccept(Expression? expression, {
     AstPrinterContext? context,
     String? fallbackText,
   }) => expression != null
     ? expression.accept(this, context)
     : (fallbackText != null
-      ? _visitNull(fallbackText, context)
+      ? _visitText(fallbackText, context)
       : _buffer
     );
 
   @override
   StringBuffer? visitIdentifier(Identifier node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
-    _buffer.writeln('Identifier: ${node.name}');
-    _tryAccept(
-      fallbackText: 'Type: Untyped',
-      context: context.addIndent(_buffer, true),
-      node.type,
-    );
+    _buffer.writeln('Identifier');
+    node.type.accept(this, context.addIndent(_buffer, false));
+    _visitText(':Name: ${node.name}', context.addIndent(_buffer, true));
     return _buffer;
   }
 
@@ -68,13 +66,18 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   StringBuffer? visitTypeCast(TypeCast node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('TypeCast');
-    node.type.accept(this, context.addIndent(_buffer, true));
+    _visitText(':Data type: ${node.dataType}', context.addIndent(_buffer, false));
+    node.expression.accept(this, context.addIndent(_buffer, true));
     return _buffer;
   }
 
   @override
-  StringBuffer? visitLiteral(Literal node, [ AstPrinterContext? context, ]) =>
-    _buffer..writeln('Literal: ${node.value}');
+  StringBuffer? visitLiteral(Literal node, [ AstPrinterContext? context, ]) {
+    context ??= _defaultContext;
+    _buffer.writeln('Literal');
+    _visitText(':Data type: ${node.dataType}', context.addIndent(_buffer, false));
+    _visitText(':Value: ${node.value}', context.addIndent(_buffer, true));
+  }
 
   @override
   StringBuffer? visitUnary(Unary node, [ AstPrinterContext? context, ]) {

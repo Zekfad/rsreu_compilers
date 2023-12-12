@@ -9,7 +9,7 @@ class AstSymbolGenerator extends AstVisitorSingleResult<SymbolTable, String> {
   @override
   SymbolTable visitIdentifier(Identifier node, [ String? context, ]) {
     final symbol = result.addIfAbsent(node.name, () => node);
-    if (symbol.type != node.type && node.type.dataType != DataType.unknown)
+    if (symbol.resolvedDataType != node.resolvedDataType && node.type.dataType != DataType.unknown)
       throw SemanticException('Identifier type redefinition', context ?? '<NO SOURCE>', node);
     return super.visitIdentifier(node, context);
   }

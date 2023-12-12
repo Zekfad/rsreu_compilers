@@ -5,6 +5,7 @@ import 'ast_visitor.dart';
 import 'data_type.dart';
 
 part 'ast/ast_node.dart';
+part 'ast/typed_node.dart';
 part 'ast/expression.dart';
 part 'ast/symbol.dart';
 part 'ast/symbol/identifier.dart';

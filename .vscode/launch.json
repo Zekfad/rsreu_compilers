@@ -41,5 +41,17 @@
 				"data/syntax_tree.txt",
 			],
 		},
+		{
+			"name": "lab_4 SEM",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/lab_4.dart",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"SEM",
+				"data/in.txt",
+				"data/syntax_tree_mod.txt",
+			],
+		},
 	],
 }

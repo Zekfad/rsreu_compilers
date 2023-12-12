@@ -2,7 +2,7 @@ part of '../ast.dart';
 
 
 @immutable
-class Type extends Expression {
+class Type extends Expression implements TypedNode {
   const Type(super.token, this.dataType);
 
   const Type._unknown() : dataType = DataType.unknown,
@@ -11,6 +11,9 @@ class Type extends Expression {
   static const unknown = Type._unknown();
 
   final DataType dataType;
+
+  @override
+  DataType get resolvedDataType => dataType;
 
   @override
   R? accept<R, C>(AstVisitor<R, C> visitor, [ C? context, ]) =>

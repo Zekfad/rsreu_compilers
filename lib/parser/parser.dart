@@ -97,8 +97,8 @@ class Parser {
   Expression _primary() {
     if (_match(const [ TokenType.integer, TokenType.floatingPoint, ])) {
       return switch (_previous()) {
-        LiteralToken<int>(:final literal?) && final token => Literal(token, literal),
-        LiteralToken<double>(:final literal?) && final token => Literal(token, literal),
+        LiteralToken<int>(:final literal?) && final token => Literal(token, literal, DataType.integer),
+        LiteralToken<double>(:final literal?) && final token => Literal(token, literal, DataType.float),
         final actual =>
           throw StateError('Invalid state, expected literal, got: $actual'),
       };
