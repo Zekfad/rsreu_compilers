@@ -1,6 +1,6 @@
 part of '../ast.dart';
 
-
+@immutable
 sealed class AstNode {
   const AstNode(this.token);
 

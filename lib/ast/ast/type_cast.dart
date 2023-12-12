@@ -1,7 +1,9 @@
 part of '../ast.dart';
 
 
-class TypeCast extends Expression implements TypedNode {
+@immutable
+@MappableClass()
+class TypeCast extends Expression with TypeCastMappable implements TypedNode {
   const TypeCast(super.token, this.expression, this.dataType) : assert(
     dataType != DataType.unknown,
     'Invalid TypeCast AST node: data type must be known',

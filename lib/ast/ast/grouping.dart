@@ -1,7 +1,8 @@
 part of '../ast.dart';
 
 
-class Grouping extends Expression {
+@MappableClass()
+class Grouping extends Expression with GroupingMappable {
   const Grouping(super.token, this.expression);
 
   final Expression expression;

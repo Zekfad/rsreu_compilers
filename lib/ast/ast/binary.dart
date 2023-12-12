@@ -1,7 +1,8 @@
 part of '../ast.dart';
 
 
-class Binary extends Expression {
+@MappableClass()
+class Binary extends Expression with BinaryMappable {
   const Binary(super.token, this.left, this.operator, this.right);
 
   final Expression left;

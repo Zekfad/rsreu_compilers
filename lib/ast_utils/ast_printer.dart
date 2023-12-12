@@ -77,6 +77,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
     _buffer.writeln('Literal');
     _visitText(':Data type: ${node.dataType}', context.addIndent(_buffer, false));
     _visitText(':Value: ${node.value}', context.addIndent(_buffer, true));
+    return _buffer;
   }
 
   @override
@@ -92,8 +93,8 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   StringBuffer? visitBinary(Binary node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Binary');
-    node.left.accept(this, context.addIndent(_buffer, false));
     _visitToken(node.operator, context.addIndent(_buffer, false));
+    node.left.accept(this, context.addIndent(_buffer, false));
     node.right.accept(this, context.addIndent(_buffer, true));
     return _buffer;
   }

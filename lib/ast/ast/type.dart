@@ -1,8 +1,8 @@
 part of '../ast.dart';
 
 
-@immutable
-class Type extends Expression implements TypedNode {
+@MappableClass()
+class Type extends Expression with TypeMappable implements TypedNode {
   const Type(super.token, this.dataType);
 
   const Type._unknown() : dataType = DataType.unknown,

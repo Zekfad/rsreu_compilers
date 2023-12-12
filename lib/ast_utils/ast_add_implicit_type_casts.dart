@@ -110,7 +110,7 @@ class AstAddImplicitTypeCasts extends AstVisitor<(AstNode, DataType), SymbolTabl
 
   @override
   (Grouping, DataType) visitGrouping(Grouping node, [ SymbolTable? context, ]) {
-    final (_node, dataType) = _accept(node..expression, context);
+    final (_node, dataType) = _accept(node.expression, context);
     return (
       Grouping(node.token, _node),
       dataType,

@@ -1,7 +1,7 @@
 part of '../../ast.dart';
 
 
-class Identifier extends Symbol {
+class Identifier extends SymbolNode {
   const Identifier(super.token, super.name, [ super.type, ]);
 
   @override

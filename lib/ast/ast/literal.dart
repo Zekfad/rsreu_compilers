@@ -1,7 +1,8 @@
 part of '../ast.dart';
 
 
-class Literal<T extends Object?> extends Expression implements TypedNode {
+@MappableClass()
+class Literal<T extends Object?> extends Expression with LiteralMappable implements TypedNode {
   const Literal(super.token, this.value, this.dataType) : assert(
     dataType != DataType.unknown,
     'Invalid Literal AST node: data type must be known',

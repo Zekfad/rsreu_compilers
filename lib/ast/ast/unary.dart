@@ -1,7 +1,8 @@
 part of '../ast.dart';
 
 
-class Unary extends Expression {
+@MappableClass()
+class Unary extends Expression with UnaryMappable {
   const Unary(super.token, this.operator, this.right);
 
   final Token operator;

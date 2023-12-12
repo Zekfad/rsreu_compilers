@@ -40,8 +40,8 @@ Future<void> main(List<String> arguments) async {
     ..addCommand('LEX', lexerParser)
     ..addCommand('syn', syntaxParser)
     ..addCommand('SYN', syntaxParser)
-    ..addCommand('sem', syntaxParser)
-    ..addCommand('SEM', syntaxParser);
+    ..addCommand('sem', semanticParser)
+    ..addCommand('SEM', semanticParser);
 
   try {
     final result = argParser.parse(arguments);
@@ -191,14 +191,13 @@ Future<void> semMode(String _input, String _syntaxTree) async {
     if (ast == null)
       throw Exception('Invalid input');
   
-    ast.accept(AstSymbolGenerator(), source)!;
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
     final printer = AstPrinter();
 
-    final (moddedAst, _) = ast.accept(const AstAddImplicitTypeCasts())!;
-    // final comp = moddedAst.accept(const AstComputeConst())!;
+    final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
+    final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;
 
-    syntaxTreeFile.write(moddedAst.accept(printer)!);
-    // syntaxTreeFile.write(comp.node.accept(printer)!);
+    syntaxTreeFile.write(astOptimized.accept(printer)!);
   } finally {
     syntaxTreeFile.close();
   }
