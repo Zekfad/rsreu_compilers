@@ -81,6 +81,7 @@ class Scanner {
   }
 
   /// Advance if current character matched [expected].
+  // ignore: unused_element
   bool _match(String expected) {
     if (_isAtEnd)
       return false;

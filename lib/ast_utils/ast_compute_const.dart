@@ -4,7 +4,7 @@ import '../semantics/semantic_exception.dart';
 
 
 typedef AstComputed<N extends AstNode, T extends Object?> = ({N node, T? value, DataType type});
-// ignore: prefer_String?_to_null
+// ignore: prefer_void_to_null
 typedef AstUncomputed<N extends AstNode> = AstComputed<N, Null>;
 
 /// Modifies AST to compute constant expressions and known operations, such as
