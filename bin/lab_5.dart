@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:rsreu_compilers/ast_utils/ast_add_implicit_type_casts.dart';
 import 'package:rsreu_compilers/ast_utils/ast_compute_const.dart';
+import 'package:rsreu_compilers/ast_utils/ast_postfix_form_generator.dart';
 import 'package:rsreu_compilers/ast_utils/ast_printer.dart';
 import 'package:rsreu_compilers/ast_utils/ast_symbol_generator.dart';
 import 'package:rsreu_compilers/file_io.dart';
@@ -35,13 +36,21 @@ Future<void> main(List<String> arguments) async {
     ..addSeparator('  syntax tree dumper: [input] [syntax_tree]');
   final semanticParser = ArgParser(allowTrailingOptions: false)
     ..addSeparator('  semantic analyzer: [input] [syntax_tree]');
+  final threeAddressCodeGeneratorParser = ArgParser(allowTrailingOptions: false)
+    ..addSeparator('  three-address code generator: [input] [portable_code] [symbols]');
+  final postfixFormParser = ArgParser(allowTrailingOptions: false)
+    ..addSeparator('  postfix form generator: [input] [postfix] [symbols]');
   final argParser = ArgParser(allowTrailingOptions: false)
     ..addCommand('lex', lexerParser)
     ..addCommand('LEX', lexerParser)
     ..addCommand('syn', syntaxParser)
     ..addCommand('SYN', syntaxParser)
     ..addCommand('sem', semanticParser)
-    ..addCommand('SEM', semanticParser);
+    ..addCommand('SEM', semanticParser)
+    ..addCommand('gen1', threeAddressCodeGeneratorParser)
+    ..addCommand('GEN1', threeAddressCodeGeneratorParser)
+    ..addCommand('gen2', postfixFormParser)
+    ..addCommand('GEN2', postfixFormParser);
 
   try {
     final result = argParser.parse(arguments);
@@ -73,6 +82,24 @@ Future<void> main(List<String> arguments) async {
             return await semMode(_input, _syntaxTree);
           } else
             throw const FormatException('Invalid arguments count.');
+        case 'gen1' || 'GEN1':
+          if (command.arguments case [
+            final _input,
+            final _portableCode,
+            final _symbols,
+          ]) {
+            return await gen1Mode(_input, _portableCode, _symbols);
+          } else
+            throw const FormatException('Invalid arguments count.');
+        case 'gen2' || 'GEN2':
+          if (command.arguments case [
+            final _input,
+            final _postfix,
+            final _symbols,
+          ]) {
+            return await gen2Mode(_input, _postfix, _symbols);
+          } else
+            throw const FormatException('Invalid arguments count.');
         default:
           throw StateError('Invalid command state.');
       }
@@ -100,7 +127,7 @@ Future<void> lexMode(String _input, String _token, String _symbols) async {
   if (!tokensFile.tryOpen(FileMode.write))
     throw const FileSystemException('Cannot open tokens file for write');
   if (!symbolsFile.tryOpen(FileMode.write))
-    throw const FileSystemException('Cannot open symbols file for write');
+    throw const FileSystemException('Cannot open tokens file for write');
   
   try {
     final scanner = Scanner(source);
@@ -200,5 +227,81 @@ Future<void> semMode(String _input, String _syntaxTree) async {
     syntaxTreeFile.write(astOptimized.accept(printer)!);
   } finally {
     syntaxTreeFile.close();
+  }
+}
+
+Future<void> gen1Mode(String _input, String _portableCode, String _symbols) async {
+  final inputFile = FileIo(File(_input));
+  final portableCodeFile = FileIo(File(_portableCode));
+  final symbolsFile = FileIo(File(_symbols));
+  final source = inputFile.readAsString();
+
+  if (!portableCodeFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open portable code file for write');
+  if (!symbolsFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open symbols file for write');
+  
+  try {
+    final scanner = Scanner(source);
+    final tokens = await getMainTokens(scanner);
+    final parser = Parser(source, tokens);
+    final ast = parser.parse();
+    if (ast == null)
+      throw Exception('Invalid input');
+  
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+  
+    for (final (id, (_, symbol)) in symbols.indexed) {
+      symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.resolvedDataType}]');
+    }
+
+    final portableCode = (() => throw UnimplementedError('TODO: Implement portable code'))();
+  
+    final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
+    astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+
+    portableCodeFile.write(portableCode);
+
+  } finally {
+    portableCodeFile.close();
+    symbolsFile.close();
+  }
+}
+
+Future<void> gen2Mode(String _input, String _postfix, String _symbols) async {
+  final inputFile = FileIo(File(_input));
+  final postfixFile = FileIo(File(_postfix));
+  final symbolsFile = FileIo(File(_symbols));
+  final source = inputFile.readAsString();
+
+  if (!postfixFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open postfix file for write');
+  if (!symbolsFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open symbols file for write');
+  
+  try {
+    final scanner = Scanner(source);
+    final tokens = await getMainTokens(scanner);
+    final parser = Parser(source, tokens);
+    final ast = parser.parse();
+    if (ast == null)
+      throw Exception('Invalid input');
+  
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+  
+    for (final (id, (_, symbol)) in symbols.indexed) {
+      symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.resolvedDataType}]');
+    }
+
+    final postfix = ast.accept(AstPostfixFormGenerator())!;
+  
+    final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
+    astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+
+    postfixFile.write(postfix);
+
+  } finally {
+    postfixFile.close();
+    symbolsFile.close();
   }
 }

@@ -53,5 +53,31 @@
 				"data/syntax_tree_mod.txt",
 			],
 		},
+		{
+			"name": "lab_5 GEN1",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/lab_5.dart",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"GEN1",
+				"data/in.txt",
+				"data/portable_code.txt",
+				"data/symbols.txt",
+			],
+		},
+		{
+			"name": "lab_5 GEN2",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/lab_5.dart",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"GEN2",
+				"data/in.txt",
+				"data/postfix.txt",
+				"data/symbols.txt",
+			],
+		},
 	],
 }

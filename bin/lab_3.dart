@@ -111,7 +111,7 @@ Future<void> lexMode(String _input, String _token, String _symbols) async {
   if (!tokensFile.tryOpen(FileMode.write))
     throw const FileSystemException('Cannot open tokens file for write');
   if (!symbolsFile.tryOpen(FileMode.write))
-    throw const FileSystemException('Cannot open tokens file for write');
+    throw const FileSystemException('Cannot open symbols file for write');
   
   try {
     final scanner = Scanner(source);
