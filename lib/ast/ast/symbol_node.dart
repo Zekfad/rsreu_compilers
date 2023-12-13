@@ -1,5 +1,6 @@
 part of '../ast.dart';
 
+
 sealed class SymbolNode extends Expression implements TypedNode {
   const SymbolNode(super.token, this.name, [
     this.type = Type.unknown,

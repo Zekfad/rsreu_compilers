@@ -22,10 +22,8 @@ class AstAddImplicitTypeCasts extends AstVisitor<(AstNode, DataType), SymbolTabl
     };
     final (typeNode, _) = _accept(node.type, context);
     return (
-      Identifier(
-        node.token,
-        node.name,
-        Type(
+      node.copyWith(
+        type: Type(
           typeNode.token,
           type,
         ),
@@ -50,12 +48,10 @@ class AstAddImplicitTypeCasts extends AstVisitor<(AstNode, DataType), SymbolTabl
   (Unary, DataType) visitUnary(Unary node, [ SymbolTable? context, ]) {
     final (_node, dataType) = _accept(node.right, context);
     return (
-      Unary(
-        node.token,
-        node.operator,
-        _node,
+      node.copyWith(
+        right: _node,
       ),
-     dataType,
+      dataType,
     );
   }
 
@@ -98,11 +94,9 @@ class AstAddImplicitTypeCasts extends AstVisitor<(AstNode, DataType), SymbolTabl
     };
 
     return (
-      Binary(
-        node.token,
-        left,
-        node.operator,
-        right,
+      node.copyWith(
+        left: left,
+        right: right,
       ),
       type,
     );
@@ -112,7 +106,9 @@ class AstAddImplicitTypeCasts extends AstVisitor<(AstNode, DataType), SymbolTabl
   (Grouping, DataType) visitGrouping(Grouping node, [ SymbolTable? context, ]) {
     final (_node, dataType) = _accept(node.expression, context);
     return (
-      Grouping(node.token, _node),
+      node.copyWith(
+        expression: _node,
+      ),
       dataType,
     );
   }

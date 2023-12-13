@@ -1,7 +1,6 @@
 part of '../ast.dart';
 
 
-@immutable
 @MappableClass()
 class TypeCast extends Expression with TypeCastMappable implements TypedNode {
   const TypeCast(super.token, this.expression, this.dataType) : assert(

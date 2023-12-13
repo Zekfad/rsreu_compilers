@@ -1,7 +1,8 @@
 part of '../../ast.dart';
 
 
-class Identifier extends SymbolNode {
+@MappableClass()
+class Identifier extends SymbolNode with IdentifierMappable {
   const Identifier(super.token, super.name, [ super.type, ]);
 
   @override

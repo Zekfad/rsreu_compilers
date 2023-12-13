@@ -6,6 +6,230 @@
 
 part of 'ast.dart';
 
+class IdentifierMapper extends ClassMapperBase<Identifier> {
+  IdentifierMapper._();
+
+  static IdentifierMapper? _instance;
+  static IdentifierMapper ensureInitialized() {
+    if (_instance == null) {
+      MapperContainer.globals.use(_instance = IdentifierMapper._());
+      TypeMapper.ensureInitialized();
+    }
+    return _instance!;
+  }
+
+  @override
+  final String id = 'Identifier';
+
+  static Token _$token(Identifier v) => v.token;
+  static const Field<Identifier, Token> _f$token = Field('token', _$token);
+  static String _$name(Identifier v) => v.name;
+  static const Field<Identifier, String> _f$name = Field('name', _$name);
+  static Type _$type(Identifier v) => v.type;
+  static const Field<Identifier, Type> _f$type =
+      Field('type', _$type, opt: true, def: Type.unknown);
+
+  @override
+  final Map<Symbol, Field<Identifier, dynamic>> fields = const {
+    #token: _f$token,
+    #name: _f$name,
+    #type: _f$type,
+  };
+
+  static Identifier _instantiate(DecodingData data) {
+    return Identifier(data.dec(_f$token), data.dec(_f$name), data.dec(_f$type));
+  }
+
+  @override
+  final Function instantiate = _instantiate;
+
+  static Identifier fromMap(Map<String, dynamic> map) {
+    return ensureInitialized().decodeMap<Identifier>(map);
+  }
+
+  static Identifier fromJson(String json) {
+    return ensureInitialized().decodeJson<Identifier>(json);
+  }
+}
+
+mixin IdentifierMappable {
+  String toJson() {
+    return IdentifierMapper.ensureInitialized()
+        .encodeJson<Identifier>(this as Identifier);
+  }
+
+  Map<String, dynamic> toMap() {
+    return IdentifierMapper.ensureInitialized()
+        .encodeMap<Identifier>(this as Identifier);
+  }
+
+  IdentifierCopyWith<Identifier, Identifier, Identifier> get copyWith =>
+      _IdentifierCopyWithImpl(this as Identifier, $identity, $identity);
+  @override
+  String toString() {
+    return IdentifierMapper.ensureInitialized()
+        .stringifyValue(this as Identifier);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (runtimeType == other.runtimeType &&
+            IdentifierMapper.ensureInitialized()
+                .isValueEqual(this as Identifier, other));
+  }
+
+  @override
+  int get hashCode {
+    return IdentifierMapper.ensureInitialized().hashValue(this as Identifier);
+  }
+}
+
+extension IdentifierValueCopy<$R, $Out>
+    on ObjectCopyWith<$R, Identifier, $Out> {
+  IdentifierCopyWith<$R, Identifier, $Out> get $asIdentifier =>
+      $base.as((v, t, t2) => _IdentifierCopyWithImpl(v, t, t2));
+}
+
+abstract class IdentifierCopyWith<$R, $In extends Identifier, $Out>
+    implements ClassCopyWith<$R, $In, $Out> {
+  TypeCopyWith<$R, Type, Type> get type;
+  $R call({Token? token, String? name, Type? type});
+  IdentifierCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+}
+
+class _IdentifierCopyWithImpl<$R, $Out>
+    extends ClassCopyWithBase<$R, Identifier, $Out>
+    implements IdentifierCopyWith<$R, Identifier, $Out> {
+  _IdentifierCopyWithImpl(super.value, super.then, super.then2);
+
+  @override
+  late final ClassMapperBase<Identifier> $mapper =
+      IdentifierMapper.ensureInitialized();
+  @override
+  TypeCopyWith<$R, Type, Type> get type =>
+      $value.type.copyWith.$chain((v) => call(type: v));
+  @override
+  $R call({Token? token, String? name, Type? type}) =>
+      $apply(FieldCopyWithData({
+        if (token != null) #token: token,
+        if (name != null) #name: name,
+        if (type != null) #type: type
+      }));
+  @override
+  Identifier $make(CopyWithData data) => Identifier(
+      data.get(#token, or: $value.token),
+      data.get(#name, or: $value.name),
+      data.get(#type, or: $value.type));
+
+  @override
+  IdentifierCopyWith<$R2, Identifier, $Out2> $chain<$R2, $Out2>(
+          Then<$Out2, $R2> t) =>
+      _IdentifierCopyWithImpl($value, $cast, t);
+}
+
+class TypeMapper extends ClassMapperBase<Type> {
+  TypeMapper._();
+
+  static TypeMapper? _instance;
+  static TypeMapper ensureInitialized() {
+    if (_instance == null) {
+      MapperContainer.globals.use(_instance = TypeMapper._());
+    }
+    return _instance!;
+  }
+
+  @override
+  final String id = 'Type';
+
+  static Token _$token(Type v) => v.token;
+  static const Field<Type, Token> _f$token = Field('token', _$token);
+  static DataType _$dataType(Type v) => v.dataType;
+  static const Field<Type, DataType> _f$dataType =
+      Field('dataType', _$dataType);
+
+  @override
+  final Map<Symbol, Field<Type, dynamic>> fields = const {
+    #token: _f$token,
+    #dataType: _f$dataType,
+  };
+
+  static Type _instantiate(DecodingData data) {
+    return Type(data.dec(_f$token), data.dec(_f$dataType));
+  }
+
+  @override
+  final Function instantiate = _instantiate;
+
+  static Type fromMap(Map<String, dynamic> map) {
+    return ensureInitialized().decodeMap<Type>(map);
+  }
+
+  static Type fromJson(String json) {
+    return ensureInitialized().decodeJson<Type>(json);
+  }
+}
+
+mixin TypeMappable {
+  String toJson() {
+    return TypeMapper.ensureInitialized().encodeJson<Type>(this as Type);
+  }
+
+  Map<String, dynamic> toMap() {
+    return TypeMapper.ensureInitialized().encodeMap<Type>(this as Type);
+  }
+
+  TypeCopyWith<Type, Type, Type> get copyWith =>
+      _TypeCopyWithImpl(this as Type, $identity, $identity);
+  @override
+  String toString() {
+    return TypeMapper.ensureInitialized().stringifyValue(this as Type);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (runtimeType == other.runtimeType &&
+            TypeMapper.ensureInitialized().isValueEqual(this as Type, other));
+  }
+
+  @override
+  int get hashCode {
+    return TypeMapper.ensureInitialized().hashValue(this as Type);
+  }
+}
+
+extension TypeValueCopy<$R, $Out> on ObjectCopyWith<$R, Type, $Out> {
+  TypeCopyWith<$R, Type, $Out> get $asType =>
+      $base.as((v, t, t2) => _TypeCopyWithImpl(v, t, t2));
+}
+
+abstract class TypeCopyWith<$R, $In extends Type, $Out>
+    implements ClassCopyWith<$R, $In, $Out> {
+  $R call({Token? token, DataType? dataType});
+  TypeCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
+}
+
+class _TypeCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Type, $Out>
+    implements TypeCopyWith<$R, Type, $Out> {
+  _TypeCopyWithImpl(super.value, super.then, super.then2);
+
+  @override
+  late final ClassMapperBase<Type> $mapper = TypeMapper.ensureInitialized();
+  @override
+  $R call({Token? token, DataType? dataType}) => $apply(FieldCopyWithData({
+        if (token != null) #token: token,
+        if (dataType != null) #dataType: dataType
+      }));
+  @override
+  Type $make(CopyWithData data) => Type(data.get(#token, or: $value.token),
+      data.get(#dataType, or: $value.dataType));
+
+  @override
+  TypeCopyWith<$R2, Type, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
+      _TypeCopyWithImpl($value, $cast, t);
+}
+
 class LiteralMapper extends ClassMapperBase<Literal> {
   LiteralMapper._();
 
@@ -462,108 +686,6 @@ class _GroupingCopyWithImpl<$R, $Out>
   GroupingCopyWith<$R2, Grouping, $Out2> $chain<$R2, $Out2>(
           Then<$Out2, $R2> t) =>
       _GroupingCopyWithImpl($value, $cast, t);
-}
-
-class TypeMapper extends ClassMapperBase<Type> {
-  TypeMapper._();
-
-  static TypeMapper? _instance;
-  static TypeMapper ensureInitialized() {
-    if (_instance == null) {
-      MapperContainer.globals.use(_instance = TypeMapper._());
-    }
-    return _instance!;
-  }
-
-  @override
-  final String id = 'Type';
-
-  static Token _$token(Type v) => v.token;
-  static const Field<Type, Token> _f$token = Field('token', _$token);
-  static DataType _$dataType(Type v) => v.dataType;
-  static const Field<Type, DataType> _f$dataType =
-      Field('dataType', _$dataType);
-
-  @override
-  final Map<Symbol, Field<Type, dynamic>> fields = const {
-    #token: _f$token,
-    #dataType: _f$dataType,
-  };
-
-  static Type _instantiate(DecodingData data) {
-    return Type(data.dec(_f$token), data.dec(_f$dataType));
-  }
-
-  @override
-  final Function instantiate = _instantiate;
-
-  static Type fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Type>(map);
-  }
-
-  static Type fromJson(String json) {
-    return ensureInitialized().decodeJson<Type>(json);
-  }
-}
-
-mixin TypeMappable {
-  String toJson() {
-    return TypeMapper.ensureInitialized().encodeJson<Type>(this as Type);
-  }
-
-  Map<String, dynamic> toMap() {
-    return TypeMapper.ensureInitialized().encodeMap<Type>(this as Type);
-  }
-
-  TypeCopyWith<Type, Type, Type> get copyWith =>
-      _TypeCopyWithImpl(this as Type, $identity, $identity);
-  @override
-  String toString() {
-    return TypeMapper.ensureInitialized().stringifyValue(this as Type);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            TypeMapper.ensureInitialized().isValueEqual(this as Type, other));
-  }
-
-  @override
-  int get hashCode {
-    return TypeMapper.ensureInitialized().hashValue(this as Type);
-  }
-}
-
-extension TypeValueCopy<$R, $Out> on ObjectCopyWith<$R, Type, $Out> {
-  TypeCopyWith<$R, Type, $Out> get $asType =>
-      $base.as((v, t, t2) => _TypeCopyWithImpl(v, t, t2));
-}
-
-abstract class TypeCopyWith<$R, $In extends Type, $Out>
-    implements ClassCopyWith<$R, $In, $Out> {
-  $R call({Token? token, DataType? dataType});
-  TypeCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
-}
-
-class _TypeCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Type, $Out>
-    implements TypeCopyWith<$R, Type, $Out> {
-  _TypeCopyWithImpl(super.value, super.then, super.then2);
-
-  @override
-  late final ClassMapperBase<Type> $mapper = TypeMapper.ensureInitialized();
-  @override
-  $R call({Token? token, DataType? dataType}) => $apply(FieldCopyWithData({
-        if (token != null) #token: token,
-        if (dataType != null) #dataType: dataType
-      }));
-  @override
-  Type $make(CopyWithData data) => Type(data.get(#token, or: $value.token),
-      data.get(#dataType, or: $value.dataType));
-
-  @override
-  TypeCopyWith<$R2, Type, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t) =>
-      _TypeCopyWithImpl($value, $cast, t);
 }
 
 class TypeCastMapper extends ClassMapperBase<TypeCast> {
