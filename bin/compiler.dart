@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:rsreu_compilers/ast_utils/ast_add_implicit_type_casts.dart';
@@ -11,6 +13,7 @@ import 'package:rsreu_compilers/ast_utils/ast_three_address_code_generator.dart'
 import 'package:rsreu_compilers/file_io.dart';
 import 'package:rsreu_compilers/parser.dart';
 import 'package:rsreu_compilers/scanner.dart';
+import 'package:rsreu_compilers/three_address_code.dart';
 
 
 void printUsage(ArgParser argParser) {
@@ -39,9 +42,14 @@ Future<void> main(List<String> arguments) async {
   final semanticParser = ArgParser(allowTrailingOptions: false)
     ..addSeparator('  semantic analyzer: [input] [syntax_tree]');
   final threeAddressCodeGeneratorParser = ArgParser(allowTrailingOptions: false)
-    ..addSeparator('  three-address code generator: [input] [portable_code] [symbols]');
+    ..addSeparator('  three-address code generator: [input] [portable_code] [symbols]')
+    ..addFlag('opt', help: 'Optimize AST before emitting three address code');
   final postfixFormParser = ArgParser(allowTrailingOptions: false)
-    ..addSeparator('  postfix form generator: [input] [postfix] [symbols]');
+    ..addSeparator('  postfix form generator: [input] [postfix] [symbols]')
+    ..addFlag('opt', help: 'Optimize AST before emitting postfix form');
+  final compilerParser = ArgParser(allowTrailingOptions: false)
+    ..addSeparator('  compiler: [input] [binary]')
+    ..addFlag('opt', help: 'Optimize AST before emitting compiled binary');
   final argParser = ArgParser(allowTrailingOptions: false)
     ..addCommand('lex', lexerParser)
     ..addCommand('LEX', lexerParser)
@@ -52,7 +60,8 @@ Future<void> main(List<String> arguments) async {
     ..addCommand('gen1', threeAddressCodeGeneratorParser)
     ..addCommand('GEN1', threeAddressCodeGeneratorParser)
     ..addCommand('gen2', postfixFormParser)
-    ..addCommand('GEN2', postfixFormParser);
+    ..addCommand('GEN2', postfixFormParser)
+    ..addCommand('GEN3', postfixFormParser);
 
   try {
     final result = argParser.parse(arguments);
@@ -60,7 +69,7 @@ Future<void> main(List<String> arguments) async {
     if (command != null)
       switch (command.name) {
         case 'lex' || 'LEX':
-          if (command.arguments case [
+          if (command.rest case [
             final _input,
             final _token,
             final _symbols,
@@ -69,7 +78,7 @@ Future<void> main(List<String> arguments) async {
           } else
             throw const FormatException('Invalid arguments count.');
         case 'syn' || 'SYN':
-          if (command.arguments case [
+          if (command.rest case [
             final _input,
             final _syntaxTree,
           ]) {
@@ -77,7 +86,7 @@ Future<void> main(List<String> arguments) async {
           } else
             throw const FormatException('Invalid arguments count.');
         case 'sem' || 'SEM':
-          if (command.arguments case [
+          if (command.rest case [
             final _input,
             final _syntaxTree,
           ]) {
@@ -85,21 +94,32 @@ Future<void> main(List<String> arguments) async {
           } else
             throw const FormatException('Invalid arguments count.');
         case 'gen1' || 'GEN1':
-          if (command.arguments case [
+          if (command.rest case [
             final _input,
             final _portableCode,
             final _symbols,
           ]) {
-            return await gen1Mode(_input, _portableCode, _symbols);
+            final optimize = command['opt'] as bool;
+            return await gen1Mode(_input, _portableCode, _symbols, optimize: optimize);
           } else
             throw const FormatException('Invalid arguments count.');
         case 'gen2' || 'GEN2':
-          if (command.arguments case [
+          if (command.rest case [
             final _input,
             final _postfix,
             final _symbols,
           ]) {
-            return await gen2Mode(_input, _postfix, _symbols);
+            final optimize = command['opt'] as bool;
+            return await gen2Mode(_input, _postfix, _symbols, optimize: optimize);
+          } else
+            throw const FormatException('Invalid arguments count.');
+        case 'GEN3':
+          if (command.rest case [
+            final _input,
+            final _binary,
+          ]) {
+            final optimize = command['opt'] as bool;
+            return await gen3Mode(_input, _binary, optimize: optimize);
           } else
             throw const FormatException('Invalid arguments count.');
         default:
@@ -232,7 +252,9 @@ Future<void> semMode(String _input, String _syntaxTree) async {
   }
 }
 
-Future<void> gen1Mode(String _input, String _portableCode, String _symbols) async {
+Future<void> gen1Mode(String _input, String _portableCode, String _symbols, {
+  bool optimize = false,
+}) async {
   final inputFile = FileIo(File(_input));
   final portableCodeFile = FileIo(File(_portableCode));
   final symbolsFile = FileIo(File(_symbols));
@@ -258,14 +280,16 @@ Future<void> gen1Mode(String _input, String _portableCode, String _symbols) asyn
     }
 
     final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
-    astWithImplicitCasts.accept(const AstComputeConst(), source)!;
     final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;
     final generator = AstThreeAddressCodeGenerator(
       AllocationTable(
         symbols: symbols,
       ),
     );
-    final portableCode = astOptimized.accept(generator)!;
+    final targetAst = optimize
+      ? astOptimized
+      : astWithImplicitCasts;
+    final portableCode = targetAst.accept(generator)!;
 
     portableCodeFile.write(portableCode.join('\n'));
   } finally {
@@ -274,7 +298,9 @@ Future<void> gen1Mode(String _input, String _portableCode, String _symbols) asyn
   }
 }
 
-Future<void> gen2Mode(String _input, String _postfix, String _symbols) async {
+Future<void> gen2Mode(String _input, String _postfix, String _symbols, {
+  bool optimize = false,
+}) async {
   final inputFile = FileIo(File(_input));
   final postfixFile = FileIo(File(_postfix));
   final symbolsFile = FileIo(File(_symbols));
@@ -298,16 +324,116 @@ Future<void> gen2Mode(String _input, String _postfix, String _symbols) async {
     for (final (id, (_, symbol)) in symbols.indexed) {
       symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.resolvedDataType}]');
     }
-
-    final postfix = ast.accept(AstPostfixFormGenerator())!;
   
     final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
-    astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+    final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+
+    final targetAst = optimize
+      ? astOptimized
+      : astWithImplicitCasts;
+
+    final postfix = targetAst.accept(AstPostfixFormGenerator())!;
 
     postfixFile.write(postfix);
-
   } finally {
     postfixFile.close();
     symbolsFile.close();
+  }
+}
+
+Future<void> gen3Mode(String _input, String _binary, {
+  bool optimize = false,
+}) async {
+  final inputFile = FileIo(File(_input));
+  final binaryFile = FileIo(File(_binary));
+  final source = inputFile.readAsString();
+
+  if (!binaryFile.tryOpen(FileMode.write))
+    throw const FileSystemException('Cannot open binary file for write');
+  
+  try {
+    final scanner = Scanner(source);
+    final tokens = await getMainTokens(scanner);
+    final parser = Parser(source, tokens);
+    final ast = parser.parse();
+    if (ast == null)
+      throw Exception('Invalid input');
+  
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+
+    final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
+    final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+
+    final table = AllocationTable(
+      symbols: symbols,
+    );
+    final generator = AstThreeAddressCodeGenerator(
+      table,
+    );
+    final targetAst = optimize
+      ? astOptimized
+      : astWithImplicitCasts;
+    final portableCode = targetAst.accept(generator)!;
+
+    var runtimeRegisters = 0;
+    final ints = <int>[];
+    final floats = <double>[];
+    final symbolNames = <Uint8List>[];
+    const codec = AsciiCodec();
+    for (final register in table.registers) {
+      switch (register) {
+        case RuntimeRegister():
+          runtimeRegisters++;
+        case Immediate<int>(:final value):
+          ints.add(value);
+        case Immediate<double>(:final value):
+          floats.add(value);
+        case Immediate(:final value):
+          throw StateError('Unexpected immediate value: $value');
+        case SymbolRegister(:final name):
+          symbolNames.add(codec.encode(name));
+      }
+    }
+
+    final headerSize = 1 + ints.length * 8
+      + 1 * floats.length * 8
+      + 1 + symbolNames
+        .map((e) => e.length + 2)
+        .fold<int>(0, (a, b) => a + b);
+
+    final buffer = ByteData(headerSize);
+    var offset = 0;
+
+    buffer.setUint8(offset, ints.length);
+    offset++;
+    for (final value in ints) {
+      buffer.setInt64(offset, value, Endian.little);
+      offset += 8;
+    }
+
+    buffer.setUint8(offset, floats.length);
+    offset++;
+    for (final value in floats) {
+      buffer.setFloat64(offset, value, Endian.little);
+      offset += 8;
+    }
+
+    buffer.setUint8(offset, symbolNames.length);
+    offset++;
+    for (final value in symbolNames) {
+      buffer.setUint8(offset, value.length);
+      offset++;
+      buffer.buffer.asUint8List(offset).setRange(
+        0,
+        value.length,
+        value,
+      );
+      offset += value.length;
+    }
+
+    // binaryFile.write(portableCode.join('\n'));
+    binaryFile.writeBinary(buffer.buffer.asUint8List());
+  } finally {
+    binaryFile.close();
   }
 }

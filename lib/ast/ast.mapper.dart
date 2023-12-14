@@ -42,47 +42,11 @@ class IdentifierMapper extends ClassMapperBase<Identifier> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Identifier fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Identifier>(map);
-  }
-
-  static Identifier fromJson(String json) {
-    return ensureInitialized().decodeJson<Identifier>(json);
-  }
 }
 
 mixin IdentifierMappable {
-  String toJson() {
-    return IdentifierMapper.ensureInitialized()
-        .encodeJson<Identifier>(this as Identifier);
-  }
-
-  Map<String, dynamic> toMap() {
-    return IdentifierMapper.ensureInitialized()
-        .encodeMap<Identifier>(this as Identifier);
-  }
-
   IdentifierCopyWith<Identifier, Identifier, Identifier> get copyWith =>
       _IdentifierCopyWithImpl(this as Identifier, $identity, $identity);
-  @override
-  String toString() {
-    return IdentifierMapper.ensureInitialized()
-        .stringifyValue(this as Identifier);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            IdentifierMapper.ensureInitialized()
-                .isValueEqual(this as Identifier, other));
-  }
-
-  @override
-  int get hashCode {
-    return IdentifierMapper.ensureInitialized().hashValue(this as Identifier);
-  }
 }
 
 extension IdentifierValueCopy<$R, $Out>
@@ -160,43 +124,11 @@ class TypeMapper extends ClassMapperBase<Type> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Type fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Type>(map);
-  }
-
-  static Type fromJson(String json) {
-    return ensureInitialized().decodeJson<Type>(json);
-  }
 }
 
 mixin TypeMappable {
-  String toJson() {
-    return TypeMapper.ensureInitialized().encodeJson<Type>(this as Type);
-  }
-
-  Map<String, dynamic> toMap() {
-    return TypeMapper.ensureInitialized().encodeMap<Type>(this as Type);
-  }
-
   TypeCopyWith<Type, Type, Type> get copyWith =>
       _TypeCopyWithImpl(this as Type, $identity, $identity);
-  @override
-  String toString() {
-    return TypeMapper.ensureInitialized().stringifyValue(this as Type);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            TypeMapper.ensureInitialized().isValueEqual(this as Type, other));
-  }
-
-  @override
-  int get hashCode {
-    return TypeMapper.ensureInitialized().hashValue(this as Type);
-  }
 }
 
 extension TypeValueCopy<$R, $Out> on ObjectCopyWith<$R, Type, $Out> {
@@ -271,46 +203,11 @@ class LiteralMapper extends ClassMapperBase<Literal> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Literal<T> fromMap<T extends Object?>(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Literal<T>>(map);
-  }
-
-  static Literal<T> fromJson<T extends Object?>(String json) {
-    return ensureInitialized().decodeJson<Literal<T>>(json);
-  }
 }
 
 mixin LiteralMappable<T extends Object?> {
-  String toJson() {
-    return LiteralMapper.ensureInitialized()
-        .encodeJson<Literal<T>>(this as Literal<T>);
-  }
-
-  Map<String, dynamic> toMap() {
-    return LiteralMapper.ensureInitialized()
-        .encodeMap<Literal<T>>(this as Literal<T>);
-  }
-
   LiteralCopyWith<Literal<T>, Literal<T>, Literal<T>, T> get copyWith =>
       _LiteralCopyWithImpl(this as Literal<T>, $identity, $identity);
-  @override
-  String toString() {
-    return LiteralMapper.ensureInitialized().stringifyValue(this as Literal<T>);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            LiteralMapper.ensureInitialized()
-                .isValueEqual(this as Literal<T>, other));
-  }
-
-  @override
-  int get hashCode {
-    return LiteralMapper.ensureInitialized().hashValue(this as Literal<T>);
-  }
 }
 
 extension LiteralValueCopy<$R, $Out, T extends Object?>
@@ -386,43 +283,11 @@ class UnaryMapper extends ClassMapperBase<Unary> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Unary fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Unary>(map);
-  }
-
-  static Unary fromJson(String json) {
-    return ensureInitialized().decodeJson<Unary>(json);
-  }
 }
 
 mixin UnaryMappable {
-  String toJson() {
-    return UnaryMapper.ensureInitialized().encodeJson<Unary>(this as Unary);
-  }
-
-  Map<String, dynamic> toMap() {
-    return UnaryMapper.ensureInitialized().encodeMap<Unary>(this as Unary);
-  }
-
   UnaryCopyWith<Unary, Unary, Unary> get copyWith =>
       _UnaryCopyWithImpl(this as Unary, $identity, $identity);
-  @override
-  String toString() {
-    return UnaryMapper.ensureInitialized().stringifyValue(this as Unary);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            UnaryMapper.ensureInitialized().isValueEqual(this as Unary, other));
-  }
-
-  @override
-  int get hashCode {
-    return UnaryMapper.ensureInitialized().hashValue(this as Unary);
-  }
 }
 
 extension UnaryValueCopy<$R, $Out> on ObjectCopyWith<$R, Unary, $Out> {
@@ -498,44 +363,11 @@ class BinaryMapper extends ClassMapperBase<Binary> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Binary fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Binary>(map);
-  }
-
-  static Binary fromJson(String json) {
-    return ensureInitialized().decodeJson<Binary>(json);
-  }
 }
 
 mixin BinaryMappable {
-  String toJson() {
-    return BinaryMapper.ensureInitialized().encodeJson<Binary>(this as Binary);
-  }
-
-  Map<String, dynamic> toMap() {
-    return BinaryMapper.ensureInitialized().encodeMap<Binary>(this as Binary);
-  }
-
   BinaryCopyWith<Binary, Binary, Binary> get copyWith =>
       _BinaryCopyWithImpl(this as Binary, $identity, $identity);
-  @override
-  String toString() {
-    return BinaryMapper.ensureInitialized().stringifyValue(this as Binary);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            BinaryMapper.ensureInitialized()
-                .isValueEqual(this as Binary, other));
-  }
-
-  @override
-  int get hashCode {
-    return BinaryMapper.ensureInitialized().hashValue(this as Binary);
-  }
 }
 
 extension BinaryValueCopy<$R, $Out> on ObjectCopyWith<$R, Binary, $Out> {
@@ -611,46 +443,11 @@ class GroupingMapper extends ClassMapperBase<Grouping> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static Grouping fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<Grouping>(map);
-  }
-
-  static Grouping fromJson(String json) {
-    return ensureInitialized().decodeJson<Grouping>(json);
-  }
 }
 
 mixin GroupingMappable {
-  String toJson() {
-    return GroupingMapper.ensureInitialized()
-        .encodeJson<Grouping>(this as Grouping);
-  }
-
-  Map<String, dynamic> toMap() {
-    return GroupingMapper.ensureInitialized()
-        .encodeMap<Grouping>(this as Grouping);
-  }
-
   GroupingCopyWith<Grouping, Grouping, Grouping> get copyWith =>
       _GroupingCopyWithImpl(this as Grouping, $identity, $identity);
-  @override
-  String toString() {
-    return GroupingMapper.ensureInitialized().stringifyValue(this as Grouping);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            GroupingMapper.ensureInitialized()
-                .isValueEqual(this as Grouping, other));
-  }
-
-  @override
-  int get hashCode {
-    return GroupingMapper.ensureInitialized().hashValue(this as Grouping);
-  }
 }
 
 extension GroupingValueCopy<$R, $Out> on ObjectCopyWith<$R, Grouping, $Out> {
@@ -725,46 +522,11 @@ class TypeCastMapper extends ClassMapperBase<TypeCast> {
 
   @override
   final Function instantiate = _instantiate;
-
-  static TypeCast fromMap(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<TypeCast>(map);
-  }
-
-  static TypeCast fromJson(String json) {
-    return ensureInitialized().decodeJson<TypeCast>(json);
-  }
 }
 
 mixin TypeCastMappable {
-  String toJson() {
-    return TypeCastMapper.ensureInitialized()
-        .encodeJson<TypeCast>(this as TypeCast);
-  }
-
-  Map<String, dynamic> toMap() {
-    return TypeCastMapper.ensureInitialized()
-        .encodeMap<TypeCast>(this as TypeCast);
-  }
-
   TypeCastCopyWith<TypeCast, TypeCast, TypeCast> get copyWith =>
       _TypeCastCopyWithImpl(this as TypeCast, $identity, $identity);
-  @override
-  String toString() {
-    return TypeCastMapper.ensureInitialized().stringifyValue(this as TypeCast);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (runtimeType == other.runtimeType &&
-            TypeCastMapper.ensureInitialized()
-                .isValueEqual(this as TypeCast, other));
-  }
-
-  @override
-  int get hashCode {
-    return TypeCastMapper.ensureInitialized().hashValue(this as TypeCast);
-  }
 }
 
 extension TypeCastValueCopy<$R, $Out> on ObjectCopyWith<$R, TypeCast, $Out> {

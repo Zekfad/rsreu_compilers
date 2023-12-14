@@ -8,11 +8,11 @@ class AllocationTable {
   AllocationTable({
     required this.symbols,
   }) {
-    for (final (_, symbol) in symbols) {
-      final register = SymbolRegister(symbol);
-      addRegister(register);
-      setNodeResult(symbol, register);
-    }
+    // for (final (_, symbol) in symbols) {
+    //   final register = SymbolRegister(symbol);
+    //   addRegister(register);
+    //   setNodeResult(symbol, register);
+    // }
   }
 
   final SymbolTable symbols;
@@ -66,6 +66,12 @@ class AllocationTable {
     // Todo(zekfad): handle case when register is exists, but its just node is
     // not linked against it.
     final _symbol = symbols.addIfAbsent(symbol.name, () => symbol);
+    for (final register in registers) {
+      if (register case SymbolRegister(symbol: final node) && final register when node == _symbol) {
+        setNodeResult(symbol, register);
+        return register;
+      }
+    }
     final register = SymbolRegister(_symbol);
     addRegister(register);
     setNodeResult(symbol, register);

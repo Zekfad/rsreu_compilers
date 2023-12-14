@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 
 class FileIo {
@@ -14,6 +15,15 @@ class FileIo {
     }
     _file!.writeStringSync(data.toString());
   }
+
+  void writeBinary(Uint8List data) {
+    if (_file == null) {
+      if (!tryOpen(FileMode.write))
+        throw const FileSystemException('Cannot open file for write');
+    }
+    _file!.writeFromSync(data);
+  }
+
 
   void writeln(Object data) {
     if (_file == null) {
