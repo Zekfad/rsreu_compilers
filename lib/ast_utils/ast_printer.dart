@@ -1,33 +1,9 @@
 import '../ast.dart';
 import '../scanner.dart';
+import 'ast_printer_context.dart';
 
 
-const _cross = ' ├─';
-const _corner = ' └─';
-const _vertical = ' │ ';
-const _space = '   ';
-
-class AstPrinterContext {
-  const AstPrinterContext(this.indent);
-
-  final String indent;
-
-  AstPrinterContext copyWith({ String? indent, }) =>
-    AstPrinterContext(
-      indent ?? this.indent,
-    );
-  
-  AstPrinterContext addIndent(StringBuffer buffer, bool isLast) {
-    buffer
-      ..write(indent)
-      ..write(isLast ? _corner : _cross);
-    return AstPrinterContext(
-      indent + (isLast ? _space : _vertical),
-    );
-  }
-}
-
-class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
+class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> implements AstVisitorFull<StringBuffer, AstPrinterContext> {
   final _buffer = StringBuffer();
 
   static const _defaultContext = AstPrinterContext(''); 
@@ -50,7 +26,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
     );
 
   @override
-  StringBuffer? visitIdentifier(Identifier node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitIdentifier(Identifier node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Identifier');
     node.type.accept(this, context.addIndent(_buffer, false));
@@ -59,11 +35,11 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   }
 
   @override
-  StringBuffer? visitType(Type node, [ AstPrinterContext? context, ]) =>
+  StringBuffer visitType(Type node, [ AstPrinterContext? context, ]) =>
     _buffer..writeln('Type: ${node.dataType}');
 
   @override
-  StringBuffer? visitTypeCast(TypeCast node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitTypeCast(TypeCast node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('TypeCast');
     _visitText(':Data type: ${node.dataType}', context.addIndent(_buffer, false));
@@ -72,7 +48,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   }
 
   @override
-  StringBuffer? visitLiteral(Literal node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitLiteral(Literal node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Literal');
     _visitText(':Data type: ${node.dataType}', context.addIndent(_buffer, false));
@@ -81,7 +57,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   }
 
   @override
-  StringBuffer? visitUnary(Unary node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitUnary(Unary node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Unary');
     _visitToken(node.operator, context.addIndent(_buffer, false));
@@ -90,7 +66,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   }
 
   @override
-  StringBuffer? visitBinary(Binary node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitBinary(Binary node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Binary');
     _visitToken(node.operator, context.addIndent(_buffer, false));
@@ -100,7 +76,7 @@ class AstPrinter extends AstVisitor<StringBuffer, AstPrinterContext> {
   }
 
   @override
-  StringBuffer? visitGrouping(Grouping node, [ AstPrinterContext? context, ]) {
+  StringBuffer visitGrouping(Grouping node, [ AstPrinterContext? context, ]) {
     context ??= _defaultContext;
     _buffer.writeln('Grouping');
     node.expression.accept(this, context.addIndent(_buffer, true));

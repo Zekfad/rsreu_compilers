@@ -9,6 +9,14 @@ class SymbolTable with IterableBase<(String, SymbolNode)> {
   final _symbols = <String, SymbolNode>{};
 
   SymbolNode? lookup(String name) => _symbols[name];
+  int? indexOf(String name) {
+    var i = 0;
+    for (final (_name, _) in this) {
+      if (_name == name)
+        return i;
+      i++;
+    }
+  }
 
   void add(SymbolNode symbol) => _symbols[symbol.name] = symbol;
 

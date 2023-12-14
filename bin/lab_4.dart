@@ -4,6 +4,7 @@ import 'package:args/args.dart';
 import 'package:rsreu_compilers/ast_utils/ast_add_implicit_type_casts.dart';
 import 'package:rsreu_compilers/ast_utils/ast_compute_const.dart';
 import 'package:rsreu_compilers/ast_utils/ast_printer.dart';
+import 'package:rsreu_compilers/ast_utils/ast_printer_minimized.dart';
 import 'package:rsreu_compilers/ast_utils/ast_symbol_generator.dart';
 import 'package:rsreu_compilers/file_io.dart';
 import 'package:rsreu_compilers/parser.dart';
@@ -166,8 +167,8 @@ Future<void> synMode(String _input, String _syntaxTree) async {
     if (ast == null)
       throw Exception('Invalid input');
   
-    ast.accept(AstSymbolGenerator(), source)!;
-    final printer = AstPrinter();
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+    final printer = AstPrinterMinimized(symbols);
   
     syntaxTreeFile.write(ast.accept(printer)!);
   } finally {
@@ -192,7 +193,7 @@ Future<void> semMode(String _input, String _syntaxTree) async {
       throw Exception('Invalid input');
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
-    final printer = AstPrinter();
+    final printer = AstPrinterMinimized(symbols);
 
     final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
     final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;

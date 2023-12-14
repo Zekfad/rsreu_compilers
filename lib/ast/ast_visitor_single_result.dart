@@ -14,13 +14,13 @@ abstract class AstVisitorSingleResult<R, C> extends AstVisitor<R, C> {
   }
 
   @override
-  R? visitType(Type node, [C? context]) {
+  R visitType(Type node, [C? context]) {
     super.visitType(node, context);
     return result;
   }
 
   @override
-  R? visitTypeCast(TypeCast node, [C? context]) {
+  R visitTypeCast(TypeCast node, [C? context]) {
     super.visitTypeCast(node, context);
     return result;
   }

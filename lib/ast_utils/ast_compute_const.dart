@@ -241,6 +241,20 @@ class AstComputeConst extends AstVisitor<AstComputed, String>  implements AstVis
       );
     }
 
+    if (_right is AstUncomputed) {
+      final type = _left.type == _right.type
+        ? _left.type
+        : DataType.unknown;
+      return _uncomputedNode(
+        node.copyWith(
+          left: _left.node,
+          right: _right.node,
+        ),
+        type,
+        context,
+      );
+    }
+
     assert(
       _right.type != DataType.unknown && _left.type != DataType.unknown,
       'Invalid state: res is computed but type is unknown',

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:rsreu_compilers/ast_utils/ast_printer.dart';
+import 'package:rsreu_compilers/ast_utils/ast_printer_minimized.dart';
 import 'package:rsreu_compilers/ast_utils/ast_symbol_generator.dart';
 import 'package:rsreu_compilers/file_io.dart';
 import 'package:rsreu_compilers/parser.dart';
@@ -93,8 +94,8 @@ Future<void> synMode(String _input, String _syntaxTree) async {
     if (ast == null)
       throw Exception('Invalid input');
   
-    ast.accept(AstSymbolGenerator(), source)!;
-    final printer = AstPrinter();
+    final symbols = ast.accept(AstSymbolGenerator(), source)!;
+    final printer = AstPrinterMinimized(symbols);
   
     syntaxTreeFile.write(ast.accept(printer)!);
   } finally {
@@ -124,7 +125,7 @@ Future<void> lexMode(String _input, String _token, String _symbols) async {
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
   
     for (final (id, (_, symbol)) in symbols.indexed) {
-      symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.type.dataType}]');
+      symbolsFile.writeln('<id,$id>\t- ${symbol.name} [${symbol.type.resolvedDataType}]');
     }
   
     for (final token in tokens) {
