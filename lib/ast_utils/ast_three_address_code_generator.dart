@@ -33,10 +33,10 @@ class AllocationTable {
     registers.add(register);
   }
 
-  Register getFreeRegister() {
+  RuntimeRegister getFreeRegister() {
     for (final register in registers) {
       if (!isRegisterLocked(register))
-        return register;
+        return register as RuntimeRegister;
     }
     final register = RuntimeRegister('r${_lastRumtimeRegisterId++}');
     registers.add(register);
@@ -85,7 +85,7 @@ class AstThreeAddressCodeGenerator extends AstVisitorSingleResult<List<Instructi
 
   final AllocationTable allocationTable;
 
-  Register _allocRegister() => allocationTable.getFreeRegister();
+  RuntimeRegister _allocRegister() => allocationTable.getFreeRegister();
 
   @override
   List<Instruction> visitBinary(Binary node, [ void context, ]) {

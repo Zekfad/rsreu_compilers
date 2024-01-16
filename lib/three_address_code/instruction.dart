@@ -1,10 +1,10 @@
-import 'package:rsreu_compilers/three_address_code/operation.dart';
-import 'package:rsreu_compilers/three_address_code/register.dart';
+import '../three_address_code.dart';
+
 
 class Instruction {
   const Instruction(this.operation, this.destination, this.arguments);
   final Operation operation;
-  final Register destination;
+  final RuntimeRegister destination;
   final List<Register> arguments;
 
   @override

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:rsreu_compilers/ast/data_type.dart';
 import 'package:rsreu_compilers/ast_utils/ast_add_implicit_type_casts.dart';
 import 'package:rsreu_compilers/ast_utils/ast_compute_const.dart';
 import 'package:rsreu_compilers/ast_utils/ast_postfix_form_generator.dart';
-import 'package:rsreu_compilers/ast_utils/ast_printer.dart';
 import 'package:rsreu_compilers/ast_utils/ast_printer_minimized.dart';
 import 'package:rsreu_compilers/ast_utils/ast_symbol_generator.dart';
 import 'package:rsreu_compilers/ast_utils/ast_three_address_code_generator.dart';
@@ -15,6 +15,10 @@ import 'package:rsreu_compilers/parser.dart';
 import 'package:rsreu_compilers/scanner.dart';
 import 'package:rsreu_compilers/three_address_code.dart';
 
+
+class InvalidInputException implements Exception {
+  const InvalidInputException();
+}
 
 void printUsage(ArgParser argParser) {
   print('Usage: ${Platform.executable} [command] [arguments]');
@@ -61,7 +65,7 @@ Future<void> main(List<String> arguments) async {
     ..addCommand('GEN1', threeAddressCodeGeneratorParser)
     ..addCommand('gen2', postfixFormParser)
     ..addCommand('GEN2', postfixFormParser)
-    ..addCommand('GEN3', postfixFormParser);
+    ..addCommand('GEN3', compilerParser);
 
   try {
     final result = argParser.parse(arguments);
@@ -127,6 +131,11 @@ Future<void> main(List<String> arguments) async {
       }
     else
       throw const FormatException('No arguments.');
+  } on InvalidInputException {
+    print('Invalid input.');
+    print('');
+    printUsage(argParser);
+    exit(1);
   } on FormatException catch (e) {
     print(e);
     print('');
@@ -157,7 +166,7 @@ Future<void> lexMode(String _input, String _token, String _symbols) async {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
   
@@ -213,7 +222,7 @@ Future<void> synMode(String _input, String _syntaxTree) async {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
     final printer = AstPrinterMinimized(symbols);
@@ -238,15 +247,15 @@ Future<void> semMode(String _input, String _syntaxTree) async {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
     final printer = AstPrinterMinimized(symbols);
 
     final (astWithImplicitCasts, _) = ast.accept(const AstAddImplicitTypeCasts(), symbols)!;
-    final AstComputed(node: astOptimized) = astWithImplicitCasts.accept(const AstComputeConst(), source)!;
+    astWithImplicitCasts.accept(const AstComputeConst(), source)!;
 
-    syntaxTreeFile.write(astOptimized.accept(printer)!);
+    syntaxTreeFile.write(astWithImplicitCasts.accept(printer)!);
   } finally {
     syntaxTreeFile.close();
   }
@@ -271,7 +280,7 @@ Future<void> gen1Mode(String _input, String _portableCode, String _symbols, {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
   
@@ -317,7 +326,7 @@ Future<void> gen2Mode(String _input, String _postfix, String _symbols, {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
   
@@ -357,7 +366,7 @@ Future<void> gen3Mode(String _input, String _binary, {
     final parser = Parser(source, tokens);
     final ast = parser.parse();
     if (ast == null)
-      throw Exception('Invalid input');
+      throw const InvalidInputException();
   
     final symbols = ast.accept(AstSymbolGenerator(), source)!;
 
@@ -373,67 +382,128 @@ Future<void> gen3Mode(String _input, String _binary, {
     final targetAst = optimize
       ? astOptimized
       : astWithImplicitCasts;
-    final portableCode = targetAst.accept(generator)!;
+    final instructions = targetAst.accept(generator)!;
 
-    var runtimeRegisters = 0;
-    final ints = <int>[];
-    final floats = <double>[];
-    final symbolNames = <Uint8List>[];
-    const codec = AsciiCodec();
-    for (final register in table.registers) {
-      switch (register) {
-        case RuntimeRegister():
-          runtimeRegisters++;
-        case Immediate<int>(:final value):
-          ints.add(value);
-        case Immediate<double>(:final value):
-          floats.add(value);
-        case Immediate(:final value):
-          throw StateError('Unexpected immediate value: $value');
-        case SymbolRegister(:final name):
-          symbolNames.add(codec.encode(name));
+    final runtimeRegisters = <RuntimeRegister>[];
+    final symbolRegisters = <SymbolRegister>[];
+    final immediateRegisters = <Immediate>[];
+    {
+      final symbolNames = <Uint8List>[];
+      const codec = AsciiCodec();
+      for (final register in table.registers) {
+        switch (register) {
+          case final RuntimeRegister register:
+            runtimeRegisters.add(register);
+          case Immediate<int>():
+            immediateRegisters.add(register);
+          case Immediate<double>():
+            immediateRegisters.add(register);
+          case Immediate(:final value):
+            throw StateError('Unexpected immediate value: $value');
+          case SymbolRegister(:final name):
+            symbolRegisters.add(register);
+            symbolNames.add(codec.encode(name));
+        }
       }
-    }
 
-    final headerSize = 1 + ints.length * 8
-      + 1 * floats.length * 8
-      + 1 + symbolNames
-        .map((e) => e.length + 2)
-        .fold<int>(0, (a, b) => a + b);
+      final headerSize = 1
+        + 1 + immediateRegisters.length * (1 + 8)
+        + 1 + symbolNames
+          .map((e) => e.length + 1 + 1 + 1)
+          .fold<int>(0, (a, b) => a + b)
+        + 1;
 
-    final buffer = ByteData(headerSize);
-    var offset = 0;
+      final header = ByteData(headerSize);
+      var offset = 0;
 
-    buffer.setUint8(offset, ints.length);
-    offset++;
-    for (final value in ints) {
-      buffer.setInt64(offset, value, Endian.little);
-      offset += 8;
-    }
-
-    buffer.setUint8(offset, floats.length);
-    offset++;
-    for (final value in floats) {
-      buffer.setFloat64(offset, value, Endian.little);
-      offset += 8;
-    }
-
-    buffer.setUint8(offset, symbolNames.length);
-    offset++;
-    for (final value in symbolNames) {
-      buffer.setUint8(offset, value.length);
+      header.setUint8(offset, runtimeRegisters.length);
       offset++;
-      buffer.buffer.asUint8List(offset).setRange(
-        0,
-        value.length,
-        value,
-      );
-      offset += value.length;
+
+      header.setUint8(offset, immediateRegisters.length);
+      offset++;
+      for (final immediate in immediateRegisters) {
+        switch (immediate) {
+          case Immediate<int>(:final value):
+            header.setUint8(offset, 0);
+            offset++;
+            header.setInt64(offset, value, Endian.little);
+            offset += 8;
+          case Immediate<double>(:final value):
+            header.setUint8(offset, 1);
+            offset++;
+            header.setFloat64(offset, value, Endian.little);
+            offset += 8;
+          case Immediate(:final value):
+            throw StateError('Unexpected immediate value: $value');
+        }
+      }
+
+      header.setUint8(offset, symbolNames.length);
+      offset++;
+      for (final (i, name) in symbolNames.indexed) {
+        offset = _writeDataType(header, offset, symbolRegisters[i].symbol.resolvedDataType);
+
+        header.setUint8(offset, name.length);
+        offset++;
+
+        header.buffer.asUint8List(offset).setRange(
+          0,
+          name.length,
+          name,
+        );
+        offset += name.length + 1;
+      }
+
+      header.setUint8(offset, instructions.length);
+      offset++;
+
+      binaryFile.writeBinary(header.buffer.asUint8List());
     }
 
-    // binaryFile.write(portableCode.join('\n'));
-    binaryFile.writeBinary(buffer.buffer.asUint8List());
+    for (final instruction in instructions) {
+      final size = 1
+        + 1
+        + 1 + instruction.arguments.length * (1 + 1);
+      final buffer = ByteData(size);
+      var offset = 0;
+
+      buffer.setUint8(offset, instruction.operation.index);
+      offset++;
+
+      buffer.setUint8(offset, runtimeRegisters.indexOf(instruction.destination));
+      offset++;
+
+      buffer.setUint8(offset, instruction.arguments.length);
+      offset++;
+
+      for (final argument in instruction.arguments) {
+        final (type, id) = switch (argument) {
+          RuntimeRegister() => (0, runtimeRegisters.indexOf(argument)),
+          Immediate() => (1, immediateRegisters.indexOf(argument)),
+          SymbolRegister() => (2, symbolRegisters.indexOf(argument)),
+        };
+        buffer.setUint8(offset, type);
+        offset++;
+
+        buffer.setUint8(offset, id);
+        offset++;
+      }
+
+      binaryFile.writeBinary(buffer.buffer.asUint8List());
+    }
   } finally {
     binaryFile.close();
   }
+}
+
+int _writeDataType(ByteData buffer, int offset, DataType dataType) {
+  buffer.setUint8(
+    offset,
+    switch (dataType) {
+      DataType.integer => 0,
+      DataType.float => 1,
+      DataType.unknown => throw StateError('Invalid state'),
+    },
+  );
+  return offset + 1;
 }
